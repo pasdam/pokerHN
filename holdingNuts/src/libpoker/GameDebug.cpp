@@ -35,5 +35,9 @@ void print_cards(const char *name, vector<Card> *cards)
 	
 	fprintf(stderr, "]]\n");
 }
-
+#else
+void print_cards(const char *name, std::vector<Card> *cards)
+{
+    Q_UNUSED(name); Q_UNUSED(cards);
+}
 #endif
