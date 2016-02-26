@@ -9,7 +9,7 @@ QT += core widgets network
 DEFINES += QT_DLL QT_CORE_LIB QT_WIDGETS_LIB QT_NETWORK_LIB
 
 CONFIG(debug, debug|release) {
-    DEFINES += DEBUG
+    DEFINES += DEBUG NOAUDIO
 }
 
 LIBS += \
