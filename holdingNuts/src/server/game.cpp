@@ -1126,6 +1126,64 @@ int client_cmd_create(clientcon *client, Tokenizer &t)
 	return 0;
 }
 
+int client_cmd_delete(clientcon *client, Tokenizer &t)
+{
+    int gameId = -1;
+    bool cmderr = true;
+
+    string infostr;
+    Tokenizer it(":");
+
+    while (t.getNext(infostr))
+    {
+        it.parse(infostr);
+
+        string infotype, infoarg;
+        it.getNext(infotype);
+
+        bool havearg = it.getNext(infoarg);
+
+        if (infotype == "gameid" && havearg)
+        {
+            gameId = Tokenizer::string2int(infoarg);
+
+            cmderr = false;
+        }
+    }
+
+    if (!cmderr)
+    {
+        bool gameFound = false;
+
+        // handle removing game
+        for (games_type::iterator e = games.begin(); e != games.end();)
+        {
+            GameController *g = e->second;
+
+            if( g->getGameId() == gameId)
+            {
+                log_msg("game", "deleting game %d", g->getGameId());
+
+                delete g;
+                games.erase(e++);
+
+                gameFound = true;
+            }
+            else
+                ++e;
+        }
+
+        if( gameFound )
+            send_ok(client);
+        else
+            send_err(client);
+    }
+    else
+        send_err(client);
+
+    return 0;
+}
+
 int client_cmd_auth(clientcon *client, Tokenizer &t)
 {
 	bool cmderr = true;
@@ -1251,9 +1309,11 @@ int client_execute(clientcon *client, const char *cmd)
 		return client_cmd_unregister(client, t);
 	else if (command == "ACTION")
 		return client_cmd_action(client, t);
-	else if (command == "CREATE")
-		return client_cmd_create(client, t);
-	else if (command == "AUTH")
+    else if (command == "CREATE")
+        return client_cmd_create(client, t);
+    else if (command == "DELETE")
+        return client_cmd_delete(client, t);
+    else if (command == "AUTH")
 		return client_cmd_auth(client, t);
 	else if (command == "CONFIG")
 		return client_cmd_config(client, t);

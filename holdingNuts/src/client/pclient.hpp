@@ -154,6 +154,7 @@ public:
 	void chat(const QString& text, int gid, int tid);
 	
 	bool createGame(gamecreate *createinfo);
+    bool deleteGame(const int gid);
 	
 	bool doSetAction(int gid, Player::PlayerAction action, chips_type amount=0);
 	

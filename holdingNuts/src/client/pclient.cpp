@@ -213,6 +213,8 @@ void PClient::serverCmdSnapTable(Tokenizer &t, int gid, int tid, tableinfo* tinf
 	if (!tinfo)
 		return;
 	
+    log_msg("application", t.toString().c_str());
+
 	table_snapshot &table = tinfo->snap;
 	HoleCards &holecards = tinfo->holecards;
 	
@@ -1146,7 +1148,17 @@ bool PClient::createGame(gamecreate *createinfo)
 		createinfo->name.simplified().toStdString().c_str());
 	netSendMsg(msg);
 	
-	return true;
+    return true;
+}
+
+bool PClient::deleteGame(const int gameId)
+{
+    char msg[1024];
+
+    snprintf(msg, sizeof(msg), "DELETE gameid:%d", gameId);
+    netSendMsg(msg);
+
+    return true;
 }
 
 #if 0
