@@ -22,12 +22,13 @@ public class RandomBotReceiver  extends AbstractBotReceiver {
 		double value = Math.random();
 		if(value < 0.05){
 			return BET_TYPE.FOLD;
-		}else if(value < 0.7) {
+		}else if(value < 0.525) {
 			return BET_TYPE.CALL;
-		}else if(value <0.95) {
+		}else if(value <0.999) {
 			return BET_TYPE.RAISE;
+		} else {
+			return BET_TYPE.NONE;
 		}
-		return null;
 	}
 
 	public RandomBotReceiver(InputStream is,final BotInterface bot) {

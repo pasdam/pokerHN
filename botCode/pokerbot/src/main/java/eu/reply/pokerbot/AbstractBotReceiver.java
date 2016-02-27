@@ -84,8 +84,9 @@ public abstract class AbstractBotReceiver implements Runnable{
 	protected Gson parser = new Gson();
 	private Map<String,String[]> playerCards = new HashMap<>();
 	
-	protected BET_TYPE currentAction = BET_TYPE.NONE;
-	protected BET_TYPE previousAction = BET_TYPE.NONE;
+	private Map<String,BET_TYPE> currentActionMap = new HashMap<>();
+	private Map<String,BET_TYPE> previousActionMap = new HashMap<>();
+	private Map<String, Integer> bigBlindMap = new HashMap<>();
 	protected final BotInterface bot;
 	
 	public  AbstractBotReceiver(final FileWriter writer, final BotInterface bot, final InputStream is) {
@@ -124,7 +125,11 @@ public abstract class AbstractBotReceiver implements Runnable{
 					String[] tableInfo = parts[2].split(":");
 					if("1".equals(tableInfo[2])){
 						bot.registerGame(table);
+						currentActionMap.put(table, BET_TYPE.NONE);
+						previousActionMap.put(table, BET_TYPE.NONE);
 					} 
+					Integer bigBlind = new Integer(parts[3].split(":")[0]);
+					bigBlindMap.put(table, bigBlind);
 					break;
 				case "SNAP": 
 					decodeSnap(parts);
@@ -233,9 +238,10 @@ public abstract class AbstractBotReceiver implements Runnable{
 			type = BET_TYPE.values()[action];
 		}
 		if(id.equals(player)){
-			previousAction = type;
+			previousActionMap.put(table, type);
 		}else{
-			currentAction = type;
+			currentActionMap.put(table, type);
+			
 		}
 	}
 
@@ -268,24 +274,9 @@ public abstract class AbstractBotReceiver implements Runnable{
 			handPhase = communityCard.length -3;
 		}
 		
-		boolean foundPot =false;
-		int pot = 0;
-		int index = 6;
-		int minBet = new Integer(parts[parts.length-1]);;
+		int minBet = new Integer(parts[parts.length-1]);
 		
-		while(!foundPot){
-			if(!parts[index].startsWith("s")) {
-				foundPot=true;
-				if(StringUtils.isEmpty(parts[index])){
-					//skip empty part
-					index++;
-				}
-				while(parts[index].startsWith("p")){
-					pot += new Integer(parts[index++].split(":")[1]);
-				}
-			}
-			index++;
-		}
+		int pot = calculatePot(parts);
 		
 		int round = Integer.parseInt(tableState[1]);
 		int bigBlind = 0;
@@ -301,12 +292,14 @@ public abstract class AbstractBotReceiver implements Runnable{
 			System.out.printf("%s - %s:%s:%s:%s:%s\n",id,dealer, smallBlind,bigBlind,current, lastBet);
 		}
 		
+		
 		boolean imBetting = checkBet(current, parts);
 		System.out.printf("Current %d is betting?%s\n", current, imBetting);
 		if(round >= 0 && imBetting) {
 			System.out.println("Check action on table:"+table);
 			String[] communityCards = Arrays.copyOfRange(communityCard, 1, communityCard.length);
-			HandEvent event = this.createHandEvent(handPhase, previousAction.ordinal()-1, currentAction.ordinal()-1, pot,0 , getPlayerCard(table), communityCards);
+			HandEvent event = this.createHandEvent(handPhase, previousActionMap.get(table).ordinal()-1, 
+					currentActionMap.get(table).ordinal()-1, pot,0 , getPlayerCard(table), communityCards);
 			BET_TYPE type = getType(event);
 			switch(type){
 			case FOLD:
@@ -322,7 +315,7 @@ public abstract class AbstractBotReceiver implements Runnable{
 				bot.call(table);
 				break;
 			case RAISE:
-				bot.raise(table, bigBlind);
+				bot.raise(table,Math.max(bigBlindMap.get(table),minBet));
 				break;
 			default:
 				bot.allIn(table);
@@ -337,6 +330,26 @@ public abstract class AbstractBotReceiver implements Runnable{
 					type.ordinal()-1);
 			logHand(eventBet);
 		}
+	}
+
+	private int calculatePot(String[] parts) {
+		boolean foundPot =false;
+		int pot = 0;
+		int index = 6;
+		while(!foundPot){
+			if(!parts[index].startsWith("s")) {
+				foundPot=true;
+				if(StringUtils.isEmpty(parts[index])){
+					//skip empty part
+					index++;
+				}
+				while(parts[index].startsWith("p")){
+					pot += new Integer(parts[index++].split(":")[1]);
+				}
+			}
+			index++;
+		}
+		return pot;
 	}
 
 }
