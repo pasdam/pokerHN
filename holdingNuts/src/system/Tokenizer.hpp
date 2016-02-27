@@ -26,6 +26,7 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
 
 class Tokenizer
 {
@@ -54,6 +55,15 @@ public:
 	friend Tokenizer& operator>>(Tokenizer& left, std::string& str);
 	Tokenizer& operator--(); // prefix
 
+    std::string toString()
+    {
+        std::stringstream ss;
+        int idx=0;
+
+        while(idx < tokens.size())
+            ss << tokens[idx++] << " ";
+        return ss.str();
+    };
 
 private:
 	std::vector<std::string> tokens;

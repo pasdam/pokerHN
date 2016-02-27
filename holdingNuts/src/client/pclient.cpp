@@ -213,6 +213,8 @@ void PClient::serverCmdSnapTable(Tokenizer &t, int gid, int tid, tableinfo* tinf
 	if (!tinfo)
 		return;
 	
+    log_msg("application", t.toString().c_str());
+
 	table_snapshot &table = tinfo->snap;
 	HoleCards &holecards = tinfo->holecards;
 	
