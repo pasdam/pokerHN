@@ -191,6 +191,10 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	btnUnregister = new QPushButton(tr("&Unregister"), this);
 	btnUnregister->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	connect(btnUnregister, SIGNAL(clicked()), this, SLOT(actionUnregister()));
+
+    btnDelete = new QPushButton(tr("&Delete"), this);
+    btnDelete->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    connect(btnDelete, SIGNAL(clicked()), this, SLOT(actionDelete()));
 	
 	btnOpenTable = new QPushButton(tr("&Open table"), this);
 	btnOpenTable->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -203,7 +207,7 @@ WMain::WMain(QWidget *parent) : QMainWindow(parent, 0)
 	QHBoxLayout *lRegister = new QHBoxLayout();
 	lRegister->addWidget(btnRegister);
 	lRegister->addWidget(btnUnregister);
-	
+    lRegister->addWidget(btnDelete);
 	
 	QHBoxLayout *lGameActions = new QHBoxLayout();
 	lGameActions->addWidget(btnOpenTable);
@@ -710,7 +714,16 @@ void WMain::actionRegister()
 
 void WMain::actionUnregister()
 {
-	doRegister(false);
+    doRegister(false);
+}
+
+void WMain::actionDelete()
+{
+    QItemSelectionModel *pSelect = viewGameList->selectionModel();
+    const int selected_row = proxyModelGameList->mapToSource(pSelect->selectedRows().at(0)).row();
+    const int gid = modelGameList->findGidByRow(selected_row);
+
+    ((PClient*)qApp)->deleteGame(gid);
 }
 
 void WMain::actionOpenTable()

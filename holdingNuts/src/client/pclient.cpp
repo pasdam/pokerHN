@@ -1146,7 +1146,17 @@ bool PClient::createGame(gamecreate *createinfo)
 		createinfo->name.simplified().toStdString().c_str());
 	netSendMsg(msg);
 	
-	return true;
+    return true;
+}
+
+bool PClient::deleteGame(const int gameId)
+{
+    char msg[1024];
+
+    snprintf(msg, sizeof(msg), "DELETE gameid:%d", gameId);
+    netSendMsg(msg);
+
+    return true;
 }
 
 #if 0
