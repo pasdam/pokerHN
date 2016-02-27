@@ -1,5 +1,6 @@
 package eu.reply.pokerbot;
 
+import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -16,13 +17,11 @@ public class Main {
 	
 	public static void main(String[] args) throws Exception{
 		int numBot = NUM_BOT;
-		if(args.length > 0) {
-			numBot = Integer.parseInt(args[0]);
-		}
+		Properties p = new Properties();
+		p.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("config.properties"));
+		numBot = Integer.parseInt(p.getProperty("numBot","1"));
 		boolean mlBot = false;
-		if(args.length > 1) {
-			mlBot = "I".equalsIgnoreCase(args[1]);
-		}
+		mlBot = "I".equalsIgnoreCase(p.getProperty("botType"));
 		new Main(numBot,mlBot);
 	}
 }

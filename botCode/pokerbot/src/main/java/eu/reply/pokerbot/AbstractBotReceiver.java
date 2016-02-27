@@ -6,7 +6,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -88,6 +90,7 @@ public abstract class AbstractBotReceiver implements Runnable{
 	private Map<String,BET_TYPE> previousActionMap = new HashMap<>();
 	private Map<String, Integer> bigBlindMap = new HashMap<>();
 	protected final BotInterface bot;
+	private Map<String, Queue<HandEventBet>> logEvent = new HashMap<>();
 	
 	public  AbstractBotReceiver(final FileWriter writer, final BotInterface bot, final InputStream is) {
 		this.writer = writer;
@@ -158,6 +161,9 @@ public abstract class AbstractBotReceiver implements Runnable{
 			break;
 		case SnapPlayerAction:
 			decodeActions(parts);
+			break;
+		case SnapWinPot:
+			logEvents(parts);
 		default:
 		}
 	}
@@ -191,7 +197,7 @@ public abstract class AbstractBotReceiver implements Runnable{
 		for(int i=0; i<2; i++){
 			playerCardsArray[i]= parseCard(playerCards[i]);
 		}
-		Card[] communityCardsArray = new Card[7];
+		Card[] communityCardsArray = new Card[5];
 		for(int i=0; i<communityCardsArray.length; i++){
 			communityCardsArray[i]= new Card("-1","-1");
 		}
@@ -202,9 +208,25 @@ public abstract class AbstractBotReceiver implements Runnable{
 	}
 
 	
-	protected void logHand(HandEventBet event){
-		
-		writer.writeString(parser.toJson(event));
+	protected void logHand(String table, HandEventBet event){
+		if(!logEvent.containsKey(table)){
+			logEvent.put(table , new LinkedList<HandEventBet>());
+		}
+		logEvent.get(table).offer(event);
+	}
+	
+	private void logEvents(String parts[]){
+		String table = getTable(parts);
+		String player = parts[3];
+		if(!player.equals(id)){
+			System.out.printf("I'm %s not the winner, the winner is %s\n",id, player);
+			logEvent.remove(table);
+		}else{
+			Queue<HandEventBet> queue = logEvent.remove(table);
+			while(!queue.isEmpty()) {
+				writer.writeString(parser.toJson(queue.poll()));
+			}
+		}
 	}
 	
 	private Card parseCard(String card){
@@ -328,7 +350,7 @@ public abstract class AbstractBotReceiver implements Runnable{
 					event.getPlayerCards(), 
 					event.getCommunityCards(), 
 					type.ordinal()-1);
-			logHand(eventBet);
+			logHand(table,eventBet);
 		}
 	}
 

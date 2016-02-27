@@ -14,8 +14,12 @@ public class IntelligentBot extends AbstractBot{
 
 	@Override
 	protected AbstractBotReceiver createReceiver(InputStream inputStream, AbstractBot bot) {
-		// TODO Auto-generated method stub
-		return new IntelligentBotReceiver(bot,inputStream);
+		// TODO Auto-generated method stub]
+		try{
+			return new IntelligentBotReceiver(bot,inputStream);
+		}catch(Exception e){
+			throw new RuntimeException(e); 
+		}
 	}
 
 	
