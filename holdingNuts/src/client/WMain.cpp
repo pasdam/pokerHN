@@ -724,6 +724,7 @@ void WMain::actionDelete()
     const int gid = modelGameList->findGidByRow(selected_row);
 
     ((PClient*)qApp)->deleteGame(gid);
+    ((PClient*)qApp)->requestGamelist();
 }
 
 void WMain::actionOpenTable()
