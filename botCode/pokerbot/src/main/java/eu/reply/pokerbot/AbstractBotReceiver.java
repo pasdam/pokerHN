@@ -223,8 +223,10 @@ public abstract class AbstractBotReceiver implements Runnable{
 			logEvent.remove(table);
 		}else{
 			Queue<HandEventBet> queue = logEvent.remove(table);
-			while(!queue.isEmpty()) {
-				writer.writeString(parser.toJson(queue.poll()));
+			if(queue != null){
+				while(!queue.isEmpty()) {
+					writer.writeString(parser.toJson(queue.poll()));
+				}
 			}
 		}
 	}
