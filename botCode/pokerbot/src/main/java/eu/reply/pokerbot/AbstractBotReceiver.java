@@ -199,7 +199,7 @@ public abstract class AbstractBotReceiver implements Runnable{
 		}
 		Card[] communityCardsArray = new Card[5];
 		for(int i=0; i<communityCardsArray.length; i++){
-			communityCardsArray[i]= new Card("-1","-1");
+			communityCardsArray[i]= new Card(-1,-1);
 		}
 		for(int i=0; i<communityCards.length; i++){
 			communityCardsArray[i]= parseCard(communityCards[i]);
@@ -248,7 +248,7 @@ public abstract class AbstractBotReceiver implements Runnable{
 				break;
 		default: cardValue = new Integer(aCard);
 		}
-		return new Card(String.valueOf(cardValue -1), String.valueOf(suit.ordinal()));
+		return new Card(cardValue -1, suit.ordinal());
 	}
 	
 	protected void decodeActions(String[] parts){

@@ -1,10 +1,10 @@
 package eu.reply.pokerbot;
 
 public class Card {
-	private String value;
-	private String suit;
+	private int value;
+	private int suit;
 	
-	public Card(String value, String suit) {
+	public Card(int value, int suit) {
 		this.value = value;
 		this.suit = suit;
 	}
@@ -13,16 +13,16 @@ public class Card {
 		
 	}
 	
-	public String getValue() {
+	public int getValue() {
 		return value;
 	}
-	public void setValue(String value) {
+	public void setValue(int value) {
 		this.value = value;
 	}
-	public String getSuit() {
+	public int getSuit() {
 		return suit;
 	}
-	public void setSuit(String suit) {
+	public void setSuit(int suit) {
 		this.suit = suit;
 	}
 	

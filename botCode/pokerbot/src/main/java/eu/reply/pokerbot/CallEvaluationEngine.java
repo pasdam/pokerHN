@@ -24,16 +24,17 @@ public class CallEvaluationEngine {
 	}
 	
 	public BET_TYPE callML(HandEvent event) throws Exception{
-		CloseableHttpClient httpClient = HttpClients.createDefault();
-		 HttpPost postRequest = new HttpPost(url);
-		 postRequest.setHeader("content-type", ContentType.APPLICATION_JSON.getMimeType());
-		 StringEntity entity = new StringEntity(
-				 gson.toJson(event), ContentType.APPLICATION_JSON);
-		 postRequest.setEntity(entity);
-		 ResponseHandler<String> handler = new BasicResponseHandler();
-		 String response = httpClient.execute(postRequest,handler);
-		 System.out.println(response);
-		 return BET_TYPE.values()[new Integer(response)+1];
+		try(CloseableHttpClient httpClient = HttpClients.createDefault();){
+			 HttpPost postRequest = new HttpPost(url);
+			 postRequest.setHeader("content-type", ContentType.APPLICATION_JSON.getMimeType());
+			 StringEntity entity = new StringEntity(
+					 gson.toJson(event), ContentType.APPLICATION_JSON);
+			 postRequest.setEntity(entity);
+			 ResponseHandler<String> handler = new BasicResponseHandler();
+			 String response = httpClient.execute(postRequest,handler);
+			 System.out.println(response);
+			 return BET_TYPE.values()[new Integer(response)+1];
+		}
 	}
 	
 	public static void main(String[] args) throws Exception{

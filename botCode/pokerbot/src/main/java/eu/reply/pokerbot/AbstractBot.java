@@ -3,6 +3,7 @@ package eu.reply.pokerbot;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Properties;
 import java.util.Scanner;
 import java.util.UUID;
 
@@ -16,8 +17,10 @@ public abstract class AbstractBot implements Runnable, BotInterface {
 
 	public void run() {
 		try{
+			Properties p = new Properties();
+			p.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("config.properties"));
 			Scanner s = new Scanner(System.in);
-			Socket socket = new Socket("localhost", 40888);
+			Socket socket = new Socket(p.getProperty("pokerServer"), new Integer(p.getProperty("pokerServerPort")));
 	        os = new PrintWriter(socket.getOutputStream(), true);
 	
 			System.out.println("Client attivo");
