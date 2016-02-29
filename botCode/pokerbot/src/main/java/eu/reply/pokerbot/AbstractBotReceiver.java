@@ -109,7 +109,6 @@ public abstract class AbstractBotReceiver implements Runnable{
 		try {
 			String command = null;
 			while ((command = is.readLine()) != null) {
-				System.out.printf("%s Received %s\n",id,command);
 				String[] parts = command.split(" ");
 				switch (parts[0]) {
 				case "PSERVER":
@@ -148,7 +147,6 @@ public abstract class AbstractBotReceiver implements Runnable{
 	
 	public void decodeSnap(String[] parts){
 		SNAP snap = SNAP.decode(parts[2]);
-		System.out.println("Received snap:"+ snap);
 		switch(snap){
 		case SnapFoyer:
 			bot.requestGameList();
@@ -218,17 +216,17 @@ public abstract class AbstractBotReceiver implements Runnable{
 	private void logEvents(String parts[]){
 		String table = getTable(parts);
 		String player = parts[3];
-		if(!player.equals(id)){
-			System.out.printf("I'm %s not the winner, the winner is %s\n",id, player);
-			logEvent.remove(table);
-		}else{
-			Queue<HandEventBet> queue = logEvent.remove(table);
-			if(queue != null){
-				while(!queue.isEmpty()) {
-					writer.writeString(parser.toJson(queue.poll()));
+		Queue<HandEventBet> queue = logEvent.remove(table);
+		if(queue != null){
+			while(!queue.isEmpty()) {
+				HandEventBet event = queue.poll();
+				if(!player.equals(id)){
+					//I've lost so the best action was fold
+					event.setCurrentActionDone(BET_TYPE.FOLD.ordinal()-1);
 				}
+				writer.writeString(parser.toJson(event));
 			}
-		}
+		}	
 	}
 	
 	private Card parseCard(String card){
@@ -286,9 +284,6 @@ public abstract class AbstractBotReceiver implements Runnable{
 
 	public void respondeSnapTable(String[] parts) {
 		int i =0;
-		for(String part:parts){
-			System.out.println(id +" - Part["+(i++)+"]:"+part);
-		}
 		String[] tableState = parts[3].split(":");
 		
 		String[] communityCard = parts[5].split(":");
@@ -306,25 +301,21 @@ public abstract class AbstractBotReceiver implements Runnable{
 		int bigBlind = 0;
 		int current = 0;
 		String[] row = parts[4].split(":");
-		System.out.println("Rows:"+Arrays.asList(row));
 		if(row.length == 5) {
 			String dealer = row[0];
 			int smallBlind = Integer.parseInt(row[1]);
 			bigBlind = Integer.parseInt(row[2]);
 			current = new Integer(row[3]);
 			int lastBet = new Integer(row[4]);
-			System.out.printf("%s - %s:%s:%s:%s:%s\n",id,dealer, smallBlind,bigBlind,current, lastBet);
 		}
-		
-		
 		boolean imBetting = checkBet(current, parts);
-		System.out.printf("Current %d is betting?%s\n", current, imBetting);
 		if(round >= 0 && imBetting) {
 			System.out.println("Check action on table:"+table);
 			String[] communityCards = Arrays.copyOfRange(communityCard, 1, communityCard.length);
 			HandEvent event = this.createHandEvent(handPhase, previousActionMap.get(table).ordinal()-1, 
 					currentActionMap.get(table).ordinal()-1, pot,0 , getPlayerCard(table), communityCards);
 			BET_TYPE type = getType(event);
+			System.out.println("Received Event data:"+type);
 			switch(type){
 			case FOLD:
 				bot.fold(table);
@@ -343,6 +334,10 @@ public abstract class AbstractBotReceiver implements Runnable{
 				break;
 			default:
 				bot.allIn(table);
+			}
+			//remap allin as RAISE
+			if(type == BET_TYPE.NONE){
+				type = BET_TYPE.RAISE;
 			}
 			HandEventBet eventBet = new HandEventBet(event.getHandPhase(), 
 					event.getPreviousActionDone(), 

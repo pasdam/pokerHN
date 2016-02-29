@@ -32,7 +32,6 @@ public class CallEvaluationEngine {
 			 postRequest.setEntity(entity);
 			 ResponseHandler<String> handler = new BasicResponseHandler();
 			 String response = httpClient.execute(postRequest,handler);
-			 System.out.println(response);
 			 return BET_TYPE.values()[new Integer(response)+1];
 		}
 	}

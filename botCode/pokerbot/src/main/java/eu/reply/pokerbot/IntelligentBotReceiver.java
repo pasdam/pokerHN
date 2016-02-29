@@ -11,6 +11,7 @@ public class IntelligentBotReceiver extends AbstractBotReceiver{
 		Properties p = new Properties();
 		p.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("config.properties"));
 		ce = new CallEvaluationEngine(p.getProperty("url","http://10.59.1.171:8800/api/v1/addrecord/1"));
+		
 	}
 
 	@Override

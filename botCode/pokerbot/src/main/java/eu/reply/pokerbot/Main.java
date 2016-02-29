@@ -9,7 +9,7 @@ public class Main {
 	private static final int NUM_BOT = 1;
 	
 	private Main(int numBot, boolean mlBot) throws Exception{
-		FileWriter writer = new FileWriter("logHand.txt");
+		FileWriter writer = new FileWriter("logHand"+System.currentTimeMillis()+".txt");
 		for(int i =0; i< numBot; i++){
 			executor.execute(mlBot?new IntelligentBot(writer):new RandomBot(writer));
 		}
